@@ -334,15 +334,21 @@ function analyseContent(type: ScanType, value: string): Analysis {
   if (urls.length) {
     const [firstUrl] = urls;
     const urlResult = getUrlFindings(firstUrl ?? '');
-    if (urlResult.score > 0) {
-      add(
-        {
-          title: 'Suspicious link included',
-          detail: 'The message includes a link with warning signs. Links can lead to fake sign-in pages or malware.',
-          tone: 'high',
-        },
-        Math.min(25, Math.max(15, Math.round(urlResult.score / 2))),
-      );
+    score += Math.min(40, urlResult.score);
+    const urlWarnings = urlResult.findings.filter((finding) => finding.tone !== 'clear');
+    if (urlWarnings.length) {
+      urlWarnings.forEach((finding) => {
+        findings.push({
+          ...finding,
+          title: `URL · ${finding.title}`,
+        });
+      });
+    } else {
+      findings.push({
+        title: 'URL check completed',
+        detail: 'The link did not show common structural warning signs in this quick check. Verify the domain before opening it.',
+        tone: 'clear',
+      });
     }
   }
   if (type === 'email' && /from:\s*.+<([^>]+)>/i.test(text)) {
