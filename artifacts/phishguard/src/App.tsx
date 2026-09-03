@@ -65,8 +65,8 @@ const defaultCopy: Record<ScanType, { title: string; placeholder: string }> = {
     placeholder: 'Include the sender, subject, and message body for a more useful check...',
   },
   message: {
-    title: 'Paste the suspicious message',
-    placeholder: 'Paste the SMS or WhatsApp message, including any links...',
+    title: 'Paste or upload the suspicious message',
+    placeholder: 'Paste the SMS or WhatsApp message, or upload a screenshot below...',
   },
   url: {
     title: 'Enter a URL to check',
@@ -390,8 +390,12 @@ function App() {
   const [activeType, setActiveType] = useState<ScanType>('email');
   const [value, setValue] = useState('');
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [selectedImageName, setSelectedImageName] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
+  const [ocrError, setOcrError] = useState('');
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [isAnalysing, setIsAnalysing] = useState(false);
+  const [isReadingImage, setIsReadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeCopy = defaultCopy[activeType];
   const highCount = useMemo(
@@ -403,6 +407,9 @@ function App() {
     setActiveType(type);
     setValue('');
     setSelectedFileName('');
+    setSelectedImageName('');
+    setImagePreview('');
+    setOcrError('');
     setAnalysis(null);
   };
 
@@ -412,6 +419,41 @@ function App() {
     setSelectedFileName(file.name);
     setValue(file.name);
     setAnalysis(null);
+  };
+
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedImageName(file.name);
+    setImagePreview(URL.createObjectURL(file));
+    setOcrError('');
+    setValue('');
+    setAnalysis(null);
+    setIsReadingImage(true);
+    try {
+      const { createWorker } = await import('tesseract.js');
+      const worker = await createWorker('eng');
+      const result = await worker.recognize(file);
+      await worker.terminate();
+      const extractedText = result.data.text.trim();
+      if (extractedText) {
+        setValue(extractedText);
+      } else {
+        setOcrError('No readable text was found. Try a clearer screenshot or paste the message instead.');
+      }
+    } catch {
+      setOcrError('We could not read this image. Try a clearer screenshot or paste the message instead.');
+    } finally {
+      setIsReadingImage(false);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImageName('');
+    setImagePreview('');
+    setOcrError('');
+    setValue('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const runAnalysis = (event?: FormEvent) => {
@@ -515,6 +557,52 @@ function App() {
                     </label>
                     <p className="upload-help">PhishGuard only reads the filename and extension. It never opens or executes the file.</p>
                   </div>
+                ) : activeType === 'message' ? (
+                  <div className="message-picker">
+                    <div className="message-textarea">
+                      <ScanSearch size={19} />
+                      <textarea
+                        id="scan-input"
+                        rows={5}
+                        value={value}
+                        onChange={(event) => {
+                          setValue(event.target.value);
+                          setAnalysis(null);
+                        }}
+                        placeholder={activeCopy.placeholder}
+                        spellCheck
+                      />
+                      {value && (
+                        <button className="clear-button" type="button" aria-label="Clear message" onClick={() => setValue('')}>
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="image-upload-row">
+                      <input
+                        ref={fileInputRef}
+                        id="message-image"
+                        type="file"
+                        className="visually-hidden"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                      />
+                      <label htmlFor="message-image" className="image-upload-cta">
+                        {imagePreview ? <img src={imagePreview} alt="" className="image-thumbnail" /> : <span className="image-upload-icon"><Upload size={17} /></span>}
+                        <span>
+                          <strong>{isReadingImage ? 'Reading screenshot...' : selectedImageName || 'Upload a screenshot instead'}</strong>
+                          <small>{isReadingImage ? 'Text stays on your device' : 'JPEG, PNG, or WebP · text is extracted locally'}</small>
+                        </span>
+                        {isReadingImage ? <span className="ocr-spinner" /> : <ArrowRight size={16} />}
+                      </label>
+                      {selectedImageName && !isReadingImage && (
+                        <button type="button" className="clear-button" aria-label="Remove uploaded screenshot" onClick={clearImage}>
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                    {ocrError && <p className="ocr-error">{ocrError}</p>}
+                  </div>
                 ) : (
                   <>
                     <ScanSearch size={19} />
@@ -539,8 +627,8 @@ function App() {
               </div>
               <div className="form-footer">
                 <span className="privacy-note"><LockKeyhole size={13} /> Nothing is uploaded or stored</span>
-                <button className="primary-button" type="submit" disabled={!value.trim() || isAnalysing}>
-                  {isAnalysing ? 'Checking...' : 'Analyse safely'} <ArrowRight size={17} />
+                <button className="primary-button" type="submit" disabled={!value.trim() || isAnalysing || isReadingImage}>
+                  {isReadingImage ? 'Reading image...' : isAnalysing ? 'Checking...' : 'Analyse safely'} <ArrowRight size={17} />
                 </button>
               </div>
             </form>
