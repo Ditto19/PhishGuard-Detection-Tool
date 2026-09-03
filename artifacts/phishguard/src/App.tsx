@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
@@ -389,10 +389,11 @@ function analyseContent(type: ScanType, value: string): Analysis {
 function App() {
   const [activeType, setActiveType] = useState<ScanType>('email');
   const [value, setValue] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState('');
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [isAnalysing, setIsAnalysing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const activeCopy = defaultCopy[activeType];
-  const activeScan = scanTypes.find((scan) => scan.id === activeType)!;
   const highCount = useMemo(
     () => analysis?.findings.filter((finding) => finding.tone === 'high').length ?? 0,
     [analysis],
@@ -401,6 +402,15 @@ function App() {
   const selectType = (type: ScanType) => {
     setActiveType(type);
     setValue('');
+    setSelectedFileName('');
+    setAnalysis(null);
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedFileName(file.name);
+    setValue(file.name);
     setAnalysis(null);
   };
 
@@ -486,22 +496,45 @@ function App() {
                 </button>
               </div>
               <div className={`textarea-wrap ${activeType === 'attachment' ? 'filename-input' : ''}`}>
-                {activeType === 'attachment' ? <Upload size={19} /> : <ScanSearch size={19} />}
-                <textarea
-                  id="scan-input"
-                  rows={activeType === 'attachment' || activeType === 'url' ? 2 : 6}
-                  value={value}
-                  onChange={(event) => {
-                    setValue(event.target.value);
-                    setAnalysis(null);
-                  }}
-                  placeholder={activeCopy.placeholder}
-                  spellCheck={activeType !== 'url' && activeType !== 'attachment'}
-                />
-                {value && (
-                  <button className="clear-button" type="button" aria-label="Clear input" onClick={() => setValue('')}>
-                    <X size={16} />
-                  </button>
+                {activeType === 'attachment' ? (
+                  <div className="attachment-picker">
+                    <input
+                      ref={fileInputRef}
+                      id="attachment-file"
+                      type="file"
+                      className="visually-hidden"
+                      onChange={handleFileChange}
+                    />
+                    <label htmlFor="attachment-file" className="upload-cta">
+                      <span className="upload-icon"><Upload size={20} /></span>
+                      <span>
+                        <strong>{selectedFileName || 'Choose a file to check'}</strong>
+                        <small>{selectedFileName ? 'Click to choose a different file' : 'Click here or use the file picker'}</small>
+                      </span>
+                      <ArrowRight size={17} />
+                    </label>
+                    <p className="upload-help">PhishGuard only reads the filename and extension. It never opens or executes the file.</p>
+                  </div>
+                ) : (
+                  <>
+                    <ScanSearch size={19} />
+                    <textarea
+                      id="scan-input"
+                      rows={activeType === 'url' ? 2 : 6}
+                      value={value}
+                      onChange={(event) => {
+                        setValue(event.target.value);
+                        setAnalysis(null);
+                      }}
+                      placeholder={activeCopy.placeholder}
+                      spellCheck={activeType !== 'url'}
+                    />
+                    {value && (
+                      <button className="clear-button" type="button" aria-label="Clear input" onClick={() => setValue('')}>
+                        <X size={16} />
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
               <div className="form-footer">
