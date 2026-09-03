@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "PhishGuard"
+description = "A web-based phishing awareness tool that analyzes suspicious emails, messages, URLs, and attachment filenames using transparent indicators, risk scoring, explanations, and safety recommendations."
+version = "1.0.0"
+id = "artifacts/phishguard"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23450
+
+[services.development]
+run = "pnpm --filter @workspace/phishguard run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/phishguard", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/phishguard/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23450"
+BASE_PATH = "/"

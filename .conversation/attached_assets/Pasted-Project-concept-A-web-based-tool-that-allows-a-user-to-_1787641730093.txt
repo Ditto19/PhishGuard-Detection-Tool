@@ -1,0 +1,370 @@
+Project concept
+
+A web-based tool that allows a user to submit a suspicious email, SMS/WhatsApp message, URL, or attachment.
+
+The tool analyses common phishing indicators and produces:
+
+Phishing Risk Score: 85/100 — HIGH RISK
+
+It then explains why the item is suspicious and gives the user recommended actions.
+
+1. Main screen
+5
+
+Keep the interface simple:
+
+╔══════════════════════════════════════════╗
+║             🛡️ PHISHGUARD               ║
+║       Phishing Detection Tool            ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║  What do you want to check?              ║
+║                                          ║
+║  [ 📧 Email ]  [ 💬 SMS/WhatsApp ]       ║
+║  [ 🌐 URL ]    [ 📎 Attachment ]         ║
+║                                          ║
+║  ┌────────────────────────────────────┐  ║
+║  │ Paste your suspicious message     │  ║
+║  │ or URL here...                    │  ║
+║  │                                   │  ║
+║  └────────────────────────────────────┘  ║
+║                                          ║
+║          [ 🔍 ANALYSE ]                  ║
+║                                          ║
+╚══════════════════════════════════════════╝
+
+The user chooses the type of item and clicks Analyse.
+
+2. Four scanning functions
+📧 A. Email Scanner
+
+The user pastes an email.
+
+Example:
+
+From: DBS Bank <security@dbs-secure-login.com>
+
+Subject: URGENT: Your account will be suspended
+
+Your account has been compromised.
+
+Please verify your account immediately by clicking the link below.
+
+http://dbs-secure-login.com/verify
+
+Please enter your username, password and OTP.
+
+The tool identifies:
+
+Indicator	Finding
+Sender	⚠️ Suspicious domain
+Urgency	🔴 Detected
+Account threat	🔴 Detected
+Credential request	🔴 Detected
+URL	🔴 Suspicious
+OTP request	🔴 Detected
+Result
+
+🔴 90/100 — HIGH RISK
+
+Then:
+
+Why is this suspicious?
+
+🔴 The message creates urgency by threatening account suspension.
+
+🔴 It asks for sensitive information such as your password and OTP.
+
+🔴 The sender's domain does not appear to match the claimed organisation.
+
+🔴 The link uses a suspicious domain.
+
+3. 💬 SMS / WhatsApp Scanner
+
+The interface can be almost identical.
+
+Example:
+
+Congratulations! You have won a $500 shopping voucher! 🎉
+
+Click below to claim your prize:
+
+http://sg-reward-claim.com
+
+Offer expires today!
+
+The tool detects:
+
+🎁 Too-good-to-be-true offer
+⏰ Urgency
+🌐 Suspicious URL
+❓ Unexpected message
+💰 Financial/reward lure
+
+Result:
+
+🔴 82/100 — HIGH RISK
+
+User education
+
+Instead of simply saying "Phishing", show:
+
+Why?
+
+Scammers commonly use attractive rewards to encourage users to click links without checking their legitimacy.
+
+What should you do?
+
+❌ Don't click the link
+❌ Don't provide personal information
+✅ Verify the offer using the organisation's official website
+
+4. 🌐 URL Scanner
+
+This can be the simplest and most technical component.
+
+User enters:
+
+https://paypa1-secure-login.com/verify
+
+The tool analyses the URL.
+
+Analysis
+URL ANALYSIS
+────────────────────────────
+
+
+HTTPS                    🟢
+Long URL                🟡
+Contains "login"        🟠
+Contains "secure"       🟠
+Lookalike domain        🔴
+Suspicious domain       🔴
+
+
+────────────────────────────
+PHISHING RISK
+
+
+        85 / 100
+
+
+        🔴 HIGH RISK
+Explanation
+
+Why is this suspicious?
+
+The domain contains "paypa1", which uses the number 1 instead of the letter l.
+
+This can be used to create a domain that looks similar to a legitimate website.
+
+Students can learn:
+
+URL structure
+Domain names
+HTTPS
+Subdomains
+Suspicious keywords
+IP addresses in URLs
+Lookalike domains
+Typosquatting
+5. 📎 Attachment Scanner
+
+For the first version, I would not actually execute or open files.
+
+Students can make a safe educational scanner based on the filename and extension.
+
+Example:
+
+Invoice_August.pdf.exe
+
+The tool detects:
+
+🔴 Double file extension
+
+The filename appears to be a PDF but the actual extension is .exe.
+
+Another example:
+
+Payment_Invoice.zip
+
+The tool could identify:
+
+🟡 Archive file
+
+and explain:
+
+Compressed files can contain executable or malicious files. Only open attachments from trusted sources.
+
+Students could also analyse:
+
+.exe
+.bat
+.cmd
+.vbs
+.js
+.scr
+.zip
+.rar
+.docm
+.xlsm
+
+The tool produces:
+
+75/100 — HIGH RISK
+
+with:
+
+🔴 Potentially dangerous file type
+🔴 Unexpected attachment
+🟡 Archive file detected
+
+Important: the project should not actually open or execute suspicious files.
+
+6. The Risk Score
+
+Keep the scoring system simple and transparent.
+
+For example:
+
+Detection	Score
+Suspicious URL	+20
+Urgent language	+15
+Requests password/OTP	+20
+Suspicious sender	+20
+Financial/reward lure	+15
+Suspicious attachment	+20
+Lookalike domain	+20
+Threatening language	+15
+
+Then:
+
+🟢 0–20
+
+LOW RISK
+
+No obvious phishing indicators detected.
+
+🟡 21–40
+
+MEDIUM RISK
+
+Some suspicious characteristics detected.
+
+🟠 41–60
+
+SUSPICIOUS
+
+Several phishing indicators detected.
+
+🔴 61+
+
+HIGH RISK
+
+Multiple strong phishing indicators detected.
+
+I would display both the score and the reasons, rather than presenting the score as if it were a definitive security verdict.
+
+7. The most important feature: "Why?"
+
+This is what makes the project educational.
+
+For every detected indicator, the system gives a short explanation.
+
+For example:
+
+🔴 Urgency
+
+"Your account will be closed within 24 hours."
+
+Attackers often create a sense of urgency so that users act before they have time to verify the message.
+
+🔴 OTP Request
+
+The message asks for your OTP.
+
+Legitimate organisations generally do not ask you to disclose an OTP through an unsolicited email or message.
+
+🔴 Suspicious URL
+
+The link uses a domain that does not appear to match the organisation being impersonated.
+
+🔴 Lookalike Domain
+
+paypa1.com
+
+The attacker uses 1 instead of l to make the domain look legitimate.
+
+🔴 Suspicious Attachment
+
+Invoice.pdf.exe
+
+Although the filename appears to be a PDF, the actual extension is .exe.
+
+This "Why?" section should be mandatory for the project.
+
+8. Recommended final result screen
+╔══════════════════════════════════════════╗
+║              ANALYSIS RESULT             ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║           PHISHING RISK SCORE            ║
+║                                          ║
+║                85 / 100                  ║
+║                                          ║
+║             🔴 HIGH RISK                 ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║              🚩 RED FLAGS                ║
+║                                          ║
+║ 🔴 Suspicious sender                     ║
+║ 🔴 Urgent/threatening language           ║
+║ 🔴 Suspicious URL                        ║
+║ 🔴 Requests sensitive information        ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║              💡 WHY?                     ║
+║                                          ║
+║ This message creates urgency and asks    ║
+║ for sensitive information. The URL also  ║
+║ appears suspicious.                      ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║           🛡️ WHAT SHOULD I DO?           ║
+║                                          ║
+║ ❌ Don't click the link                  ║
+║ ❌ Don't provide your password/OTP       ║
+║ ✅ Verify using the official website     ║
+║                                          ║
+╚══════════════════════════════════════════╝
+9. Keep the Vibe Coding scope manageable
+
+I would structure the student project into three levels.
+
+Level 1 — Basic ⭐
+
+Students build:
+
+Web interface
+Four input types
+Rule-based detection
+Risk score
+Red flags
+Explanation
+Level 2 — Enhanced ⭐⭐
+
+Add:
+
+Better URL analysis
+More phishing keywords
+Filename/extension analysis
+More scenarios
+Improved UI/UX
+Level 3 — Advanced ⭐⭐⭐
+
+Optional:
+
+AI-generated explanation
+URL reputation API
+Email header analysis
+Database of phishing examples
